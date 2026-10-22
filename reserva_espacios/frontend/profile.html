@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Mi Perfil</title>
+    <link rel="icon" type="image/png" sizes="64x64" href="img/favicon.png">
+    <link rel="stylesheet" href="css/styles.css?v=layout-20261021">
+  </head>
+  <body data-page="profile">
+    <header class="site-header">
+      <nav class="nav" aria-label="Navegación principal">
+        <a class="brand" href="index.html"><img class="brand-logo" src="img/logo.png" alt="Reserva Campus" width="76" height="45"></a>
+        <div class="nav-links">
+          <a href="index.html">Inicio</a>
+          <a href="spaces.html">Espacios</a>
+          <a href="reservations.html">Reservar</a>
+          <a data-admin-link href="admin.html" hidden>Administración</a>
+          <a data-login-link href="login.html">Iniciar sesión</a>
+          <a class="profile-link is-current" data-profile-link href="profile.html" aria-label="Mi perfil" title="Mi perfil" hidden>
+            <svg aria-hidden="true" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="3.5"></circle><path d="M5 20c.7-3.4 3.2-5.2 7-5.2s6.3 1.8 7 5.2"></path></svg>
+          </a>
+        </div>
+      </nav>
+    </header>
+    <main class="page profile-page">
+      <div class="page-intro">
+        <p class="eyebrow">Tu Cuenta</p>
+        <h1>Mi Perfil</h1>
+        <p>Consulta la información asociada a tu cuenta de Reserva Campus.</p>
+      </div>
+      <dialog class="agenda-dialog logout-dialog" data-logout-dialog aria-labelledby="logout-dialog-title" aria-describedby="logout-dialog-description">
+        <div class="logout-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M10 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h4M15 8l4 4-4 4M19 12H9"></path></svg></div>
+        <h2 id="logout-dialog-title">¿Cerrar Sesión?</h2>
+        <p id="logout-dialog-description">Saldrás de tu cuenta de Reserva Campus y tendrás que iniciar sesión de nuevo para reservar espacios.</p>
+        <form method="dialog" class="logout-confirm-form">
+          <div class="form-actions logout-confirm-actions">
+            <button class="button button-outline" data-logout-cancel type="button">Cancelar</button>
+            <button class="button button-danger" value="logout" type="submit">Sí, cerrar sesión</button>
+          </div>
+        </form>
+      </dialog>
+
+      <p class="feedback" data-profile-feedback role="status" aria-live="polite">Cargando tu perfil…</p>
+      <section class="profile-layout" data-profile-content aria-label="Información de mi perfil" hidden>
+        <article class="profile-summary card">
+          <div class="profile-avatar" data-profile-avatar aria-hidden="true">RC</div>
+          <h2 data-profile-name></h2>
+          <p data-profile-email></p>
+          <span class="profile-status" data-profile-status></span>
+          <button class="button button-danger profile-logout" data-logout-button type="button" hidden>Cerrar sesión</button>
+        </article>
+        <article class="profile-details card">
+          <div class="form-card-heading">
+            <h2>Datos De La Cuenta</h2>
+            <p>Estos datos identifican tu cuenta en el sistema.</p>
+          </div>
+          <dl class="profile-data">
+            <div><dt>Nombre completo</dt><dd data-profile-detail-name></dd></div>
+            <div><dt>Correo electrónico</dt><dd data-profile-detail-email></dd></div>
+            <div><dt>Estado de la cuenta</dt><dd data-profile-detail-status></dd></div>
+          </dl>
+          <section class="profile-roles" aria-labelledby="profile-roles-title">
+            <h3 id="profile-roles-title">Roles Asignados</h3>
+            <div class="profile-role-list" data-profile-roles></div>
+          </section>
+        </article>
+      </section>
+      <aside class="profile-signin card" data-profile-signin hidden>
+        <div class="profile-signin-mark" aria-hidden="true">!</div>
+        <div>
+          <h2>Inicia Sesión Para Ver Tu Perfil</h2>
+          <p>La información de la cuenta está disponible después de iniciar sesión.</p>
+          <a class="button button-primary" href="login.html">Ir a iniciar sesión</a>
+        </div>
+      </aside>
+    </main>
+    <footer class="site-footer"><div>Reserva Campus &middot; Sistema de reserva de espacios</div></footer>
+    <script type="module" src="js/app.js?v=title-case-20261021"></script>
+  </body>
+</html>

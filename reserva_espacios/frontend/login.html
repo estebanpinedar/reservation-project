@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Iniciar Sesión</title>
+    <link rel="icon" type="image/png" sizes="64x64" href="img/favicon.png">
+    <link rel="stylesheet" href="css/styles.css?v=password-toggle-smooth-20261021">
+  </head>
+  <body data-page="login">
+    <header class="site-header"><nav class="nav" aria-label="Navegación principal"><a class="brand" href="index.html"><img class="brand-logo" src="img/logo.png" alt="Reserva Campus" width="76" height="45"></a><div class="nav-links"><a href="spaces.html">Espacios</a><a href="reservations.html">Reservar</a><a data-admin-link href="admin.html" hidden>Administración</a><a data-login-link href="login.html">Iniciar sesión</a><a class="profile-link" data-profile-link href="profile.html" aria-label="Mi perfil" title="Mi perfil" hidden><svg aria-hidden="true" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="3.5"></circle><path d="M5 20c.7-3.4 3.2-5.2 7-5.2s6.3 1.8 7 5.2"></path></svg></a></div></nav></header>
+    <main class="login-shell">
+      <aside class="login-aside">
+        <img class="login-logo" src="img/logo-white.png" alt="Reserva Campus" width="280" height="138">
+        <h2>Reserva El Espacio Ideal Para Tu Actividad</h2>
+        <ul><li>Consulta la disponibilidad de cada espacio</li><li>Solicita tu reserva en pocos pasos</li><li>Revisa y cancela tus reservas cuando lo necesites</li></ul>
+      </aside>
+      <form class="login-card" data-auth-form>
+        <span class="brand-mark login-mark" aria-hidden="true">RC</span>
+        <p class="eyebrow">Reserva Campus</p>
+        <h1 data-auth-title>Te Damos La Bienvenida</h1><p data-auth-description>Inicia sesión para solicitar, consultar o administrar tus reservas.</p>
+        <div class="field" data-name-field hidden><label for="name">Nombre completo</label><input id="name" name="name" type="text" autocomplete="name" maxlength="120"></div>
+        <div class="field"><label for="email">Correo electrónico</label><input id="email" name="email" type="email" autocomplete="email" maxlength="255" required></div>
+        <div class="field"><label for="password">Contraseña</label><div class="password-input"><input id="password" name="password" type="password" autocomplete="current-password" maxlength="72" required><button class="password-toggle" type="button" data-password-toggle="password" aria-label="Mostrar contraseña" aria-pressed="false"><svg class="password-icon-open" data-eye-open aria-hidden="true" viewBox="0 0 24 24" fill="none"><path d="M2.5 12s3.2-6 9.5-6 9.5 6 9.5 6-3.2 6-9.5 6-9.5-6-9.5-6Z"></path><circle cx="12" cy="12" r="2.5"></circle></svg><svg class="password-icon-closed" data-eye-closed aria-hidden="true" viewBox="0 0 24 24" fill="none"><path d="M3 3l18 18M10.6 6.2A10.8 10.8 0 0 1 12 6c6.3 0 9.5 6 9.5 6a15 15 0 0 1-3.1 3.7M6.2 6.3C3.8 8 2.5 12 2.5 12s3.2 6 9.5 6c1 0 1.9-.2 2.7-.5"></path><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"></path></svg></button></div></div>
+        <ul class="password-requirements" data-password-requirements aria-label="Requisitos de contraseña" hidden>
+          <li data-password-rule="length">Mínimo 12 caracteres</li>
+          <li data-password-rule="uppercase">Una letra mayúscula</li>
+          <li data-password-rule="lowercase">Una letra minúscula</li>
+          <li data-password-rule="number">Un número</li>
+          <li data-password-rule="special">Un carácter especial</li>
+        </ul>
+        <div class="password-strength" data-password-strength data-level="good" hidden>
+          <div class="password-strength-heading"><span>Nivel estimado de seguridad</span><strong data-password-strength-label></strong></div>
+          <div class="password-strength-meter" data-password-strength-meter role="meter" aria-label="Nivel estimado de seguridad de la contraseña" aria-valuemin="1" aria-valuemax="3" aria-valuenow="1" aria-valuetext="Buena">
+            <span data-strength-segment></span><span data-strength-segment></span><span data-strength-segment></span>
+          </div>
+        </div>
+        <div class="field" data-confirm-password-field hidden><label for="confirm-password">Confirmar contraseña</label><div class="password-input"><input id="confirm-password" name="confirmPassword" type="password" autocomplete="new-password" maxlength="72"><button class="password-toggle" type="button" data-password-toggle="confirmPassword" aria-label="Mostrar contraseña" aria-pressed="false"><svg class="password-icon-open" data-eye-open aria-hidden="true" viewBox="0 0 24 24" fill="none"><path d="M2.5 12s3.2-6 9.5-6 9.5 6 9.5 6-3.2 6-9.5 6-9.5-6-9.5-6Z"></path><circle cx="12" cy="12" r="2.5"></circle></svg><svg class="password-icon-closed" data-eye-closed aria-hidden="true" viewBox="0 0 24 24" fill="none"><path d="M3 3l18 18M10.6 6.2A10.8 10.8 0 0 1 12 6c6.3 0 9.5 6 9.5 6a15 15 0 0 1-3.1 3.7M6.2 6.3C3.8 8 2.5 12 2.5 12s3.2 6 9.5 6c1 0 1.9-.2 2.7-.5"></path><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"></path></svg></button></div><small class="field-hint password-match-hint" data-password-match-hint aria-live="polite"></small></div>
+        <p class="feedback" data-feedback role="status" aria-live="polite" hidden></p>
+        <button class="button button-primary" data-auth-submit type="submit">Iniciar sesión</button>
+        <button class="text-button" data-auth-toggle type="button">Crear una cuenta</button>
+      </form>
+    </main>
+    <footer class="site-footer"><div>Reserva Campus &middot; Sistema de reserva de espacios</div></footer>
+    <script type="module" src="js/app.js?v=password-toggle-smooth-20261021"></script>
+  </body>
+</html>

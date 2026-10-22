@@ -1,0 +1,26 @@
+spring:
+  application:
+    name: rsu-auth-service
+  datasource:
+    url: jdbc:h2:file:${user.home}/rsu_auth_service_space_reservation;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DEFAULT_NULL_ORDERING=HIGH;DB_CLOSE_DELAY=-1
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+  flyway:
+    enabled: true
+
+app:
+  bootstrap-admin:
+    name: ${APP_BOOTSTRAP_ADMIN_NAME:}
+    email: ${APP_BOOTSTRAP_ADMIN_EMAIL:}
+    password: ${APP_BOOTSTRAP_ADMIN_PASSWORD:}
+  security:
+    jwt:
+      # This default is only suitable for local development. Set APP_SECURITY_JWT_SECRET in deployed environments.
+      secret: ${APP_SECURITY_JWT_SECRET:local-development-secret-change-this-before-production-2026}
+      issuer: rsu-auth-service
+      expiration: PT1H

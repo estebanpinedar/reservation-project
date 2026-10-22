@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Administración</title>
+    <link rel="icon" type="image/png" sizes="64x64" href="img/favicon.png">
+    <link rel="stylesheet" href="css/styles.css?v=layout-20261021">
+  </head>
+  <body data-page="admin">
+    <header class="site-header">
+      <nav class="nav" aria-label="Navegación principal">
+        <a class="brand" href="index.html"><img class="brand-logo" src="img/logo.png" alt="Reserva Campus" width="76" height="45"></a>
+        <div class="nav-links">
+        <a href="index.html">Inicio</a><a href="spaces.html">Espacios</a><a href="reservations.html">Reservar</a>
+          <a class="is-current" data-admin-link href="admin.html" hidden>Administración</a>
+          
+          <a data-login-link href="login.html">Iniciar sesión</a>
+          
+          <a class="profile-link" data-profile-link href="profile.html" aria-label="Mi perfil" title="Mi perfil" hidden><svg aria-hidden="true" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="3.5"></circle><path d="M5 20c.7-3.4 3.2-5.2 7-5.2s6.3 1.8 7 5.2"></path></svg></a>
+        </div>
+      </nav>
+    </header>
+    <main class="page">
+      <div class="page-intro">
+        <p class="eyebrow">Panel De Gestión</p>
+        <h1>Administración Del Sistema</h1>
+        <p>Gestiona espacios, permisos, bloqueos y consulta la actividad del campus.</p>
+      </div>
+      <p class="feedback" data-admin-access-message role="status" aria-live="polite">Comprobando permisos…</p>
+      <div class="admin-layout" data-admin-content hidden>
+        <nav class="admin-nav card" aria-label="Secciones de administración">
+          <a href="#sec-spaces" data-admin-only>Espacios Y Tipos</a>
+          <a href="#sec-manager" data-manager-only hidden>Mis Espacios</a>
+          <a href="#sec-users" data-admin-only>Usuarios Y Roles</a>
+          <a href="#sec-blocks">Bloqueos</a>
+          <a href="#sec-agenda" data-admin-only>Agenda</a>
+          <a href="#sec-reports" data-admin-only>Uso Y Auditoría</a>
+        </nav>
+        <div class="admin-main">
+        <section class="admin-section" data-admin-only id="sec-spaces" aria-labelledby="spaces-admin-title">
+          <div class="section-heading"><div><h2 id="spaces-admin-title">Espacios Y Tipos</h2><p>Registra espacios y cambia su estado sin borrar su historial.</p></div></div>
+          <form class="filter-bar admin-space-filter" data-admin-space-filter>
+            <div class="field"><label for="admin-space-query">Nombre o ubicación</label><input id="admin-space-query" name="query" maxlength="120"></div>
+            <div class="field"><label for="admin-space-filter-type">Tipo</label><select id="admin-space-filter-type" name="type"><option value="">Todos los tipos</option></select></div>
+            <div class="field"><label for="admin-space-min-capacity">Capacidad mínima</label><input id="admin-space-min-capacity" name="minimumCapacity" type="number" min="1" max="100000"></div>
+            <div class="field"><label for="admin-space-filter-status">Estado</label><select id="admin-space-filter-status" name="status"><option value="">Todos</option><option value="ACTIVE">Activo</option><option value="MAINTENANCE">Mantenimiento</option><option value="INACTIVE">Inactivo</option></select></div>
+            <button class="button button-primary" type="submit">Filtrar espacios</button>
+          </form>
+          <p class="feedback" data-admin-space-filter-feedback role="status" aria-live="polite" hidden></p>
+          <form class="form-card admin-form" data-admin-space-form>
+            <input name="spaceId" type="hidden">
+            <div class="form-grid">
+              <div class="field"><label for="admin-space-name">Nombre</label><input class="catalog-title-input" id="admin-space-name" name="name" maxlength="120" required></div>
+              <div class="field"><label for="admin-space-type">Tipo</label><select id="admin-space-type" name="typeId" required><option value="">Selecciona un tipo</option></select></div>
+              <div class="field"><label for="admin-space-location">Ubicación</label><input id="admin-space-location" name="location" maxlength="160" required></div>
+              <div class="field"><label for="admin-space-capacity">Capacidad</label><input id="admin-space-capacity" name="capacity" type="number" min="1" max="100000" required></div>
+              <div class="field"><label for="admin-space-status">Estado</label><select id="admin-space-status" name="status"><option value="ACTIVE">Activo</option><option value="MAINTENANCE">Mantenimiento</option><option value="INACTIVE">Inactivo</option></select></div>
+              <div class="field full"><label for="admin-space-description">Descripción</label><textarea id="admin-space-description" name="description" maxlength="500"></textarea></div>
+            </div>
+            <p class="feedback" data-space-feedback role="status" aria-live="polite" hidden></p>
+            <div class="form-actions"><button class="button button-primary" type="submit" data-space-submit>Crear espacio</button><button class="button button-outline" type="button" data-space-reset hidden>Cancelar edición</button></div>
+          </form>
+          <div class="admin-list" data-admin-spaces aria-live="polite"></div>
+          <form class="filter-bar admin-type-form" data-admin-type-form>
+            <input name="typeId" type="hidden">
+            <div class="field"><label for="admin-type-name">Nuevo tipo de espacio</label><input class="catalog-title-input" id="admin-type-name" name="name" maxlength="80" required></div>
+            <div class="field"><label for="admin-type-description">Descripción</label><input id="admin-type-description" name="description" maxlength="250"></div>
+            <div class="form-actions"><button class="button button-primary" type="submit" data-type-submit>Agregar tipo</button><button class="button button-outline" type="button" data-type-reset hidden>Cancelar edición</button></div>
+          </form>
+          <p class="feedback" data-type-feedback role="status" aria-live="polite" hidden></p>
+          <div class="admin-list" data-admin-types></div>
+        </section>
+
+        <section class="admin-section" data-manager-only hidden id="sec-manager" aria-labelledby="manager-spaces-title">
+          <div class="section-heading"><div><h2 id="manager-spaces-title">Estado De Mis Espacios</h2><p>Actualiza el estado de los espacios que tienes asignados.</p></div></div>
+          <p class="feedback" data-manager-spaces-feedback role="status" aria-live="polite" hidden></p>
+          <div class="admin-list" data-manager-spaces aria-live="polite"></div>
+        </section>
+
+        <section class="admin-section" data-admin-only id="sec-users" aria-labelledby="users-admin-title">
+          <div class="section-heading"><div><h2 id="users-admin-title">Usuarios, Roles Y Espacios Asignados</h2><p>Una cuenta puede conservar varios roles. Los responsables gestionan los espacios que tienen asignados.</p></div></div>
+          <p class="feedback" data-users-feedback role="status" aria-live="polite">Cargando usuarios…</p>
+          <div class="admin-list" data-admin-users></div>
+        </section>
+
+        <section class="admin-section" id="sec-blocks" aria-labelledby="blocks-admin-title">
+          <div class="section-heading"><div><h2 id="blocks-admin-title">Bloqueos</h2><p>Reserva periodos de mantenimiento o uso institucional y conserva el registro al cancelarlos.</p></div></div>
+          <form class="form-card admin-form" data-admin-block-form>
+            <div class="form-grid">
+              <div class="field full"><label for="admin-block-space">Espacio</label><select id="admin-block-space" name="spaceId" required><option value="">Selecciona un espacio activo</option></select></div>
+              <div class="field"><label for="admin-block-start">Inicio</label><input id="admin-block-start" name="startAt" type="datetime-local" required></div>
+              <div class="field"><label for="admin-block-end">Fin</label><input id="admin-block-end" name="endAt" type="datetime-local" required></div>
+              <div class="field full"><label for="admin-block-reason">Motivo</label><textarea id="admin-block-reason" name="reason" maxlength="250" required></textarea></div>
+            </div>
+            <p class="feedback" data-block-feedback role="status" aria-live="polite" hidden></p>
+            <div class="form-actions"><button class="button button-primary" type="submit">Crear bloqueo</button></div>
+          </form>
+          <div class="admin-list" data-admin-blocks></div>
+        </section>
+
+        <section class="admin-section" data-admin-only id="sec-agenda" aria-labelledby="agenda-admin-title">
+          <div class="section-heading"><div><h2 id="agenda-admin-title">Agenda Administrativa</h2><p>Consulta reservas y bloqueos en un periodo, por espacio o para todo el campus.</p></div></div>
+          <form class="filter-bar admin-filter" data-admin-agenda-form>
+            <div class="field"><label for="agenda-date">Fecha</label><input id="agenda-date" name="date" type="date" required></div>
+            <div class="field"><label for="agenda-space">Espacio</label><select id="agenda-space" name="spaceId"><option value="">Todos los espacios</option></select></div>
+            <div class="field"><label for="agenda-status">Estado</label><select id="agenda-status" name="status"><option value="">Todos</option><option value="ACTIVE">Activas</option><option value="CANCELLED">Canceladas</option><option value="FINISHED">Finalizadas</option></select></div>
+            <button class="button button-primary" type="submit">Consultar agenda</button>
+          </form>
+          <p class="feedback" data-agenda-feedback role="status" aria-live="polite" hidden></p>
+          <div class="admin-list" data-admin-agenda></div>
+        </section>
+
+        <section class="admin-section" data-admin-only id="sec-reports" aria-labelledby="reports-admin-title">
+          <div class="section-heading"><div><h2 id="reports-admin-title">Uso Y Auditoría</h2><p>Indicadores de ocupación y últimas operaciones administrativas.</p></div></div>
+          <form class="filter-bar admin-filter" data-admin-report-form>
+            <div class="field"><label for="report-from">Desde</label><input id="report-from" name="from" type="date" required></div>
+            <div class="field"><label for="report-to">Hasta</label><input id="report-to" name="to" type="date" required></div>
+            <button class="button button-primary" type="submit">Generar reporte</button>
+          </form>
+          <p class="feedback" data-report-feedback role="status" aria-live="polite" hidden></p>
+          <div class="admin-list" data-admin-report></div>
+          <h3 class="admin-subtitle">Operaciones Recientes</h3>
+          <p class="feedback" data-audit-feedback role="status" aria-live="polite" hidden></p>
+          <div class="admin-list" data-admin-audit></div>
+        </section>
+      </div>
+      </div>
+    </main>
+    <footer class="site-footer"><div>Reserva Campus &middot; Sistema de reserva de espacios</div></footer>
+    <script type="module" src="js/app.js?v=title-case-20261021"></script>
+  </body>
+</html>

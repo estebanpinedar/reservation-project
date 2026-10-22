@@ -1,0 +1,17 @@
+server:
+  forward-headers-strategy: framework
+
+spring:
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USER}
+    password: ${DB_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+
+app:
+  web:
+    allowed-origins: ${APP_WEB_ALLOWED_ORIGINS}
+  security:
+    jwt:
+      secret: ${APP_SECURITY_JWT_SECRET}
+    require-https: true
