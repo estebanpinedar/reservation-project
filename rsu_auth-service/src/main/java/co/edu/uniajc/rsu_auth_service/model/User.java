@@ -3,10 +3,11 @@ package co.edu.uniajc.rsu_auth_service.model;
 import java.time.OffsetDateTime;
 import java.util.LinkedHashSet;
 import java.util.Set;
-import java.util.UUID;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
@@ -22,7 +23,8 @@ import jakarta.persistence.Table;
 @Table(name = "usuarios")
 public class User {
     @Id
-    private UUID id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     @Column(name = "nombre", nullable = false)
     private String name;
@@ -59,7 +61,6 @@ public class User {
     }
 
     public User(String name, String email, String passwordHash, Role role) {
-        this.id = UUID.randomUUID();
         this.name = name;
         this.email = email;
         this.passwordHash = passwordHash;
@@ -79,7 +80,7 @@ public class User {
         updatedAt = OffsetDateTime.now();
     }
 
-    public UUID getId() {
+    public Long getId() {
         return id;
     }
 

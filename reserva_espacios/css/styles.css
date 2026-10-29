@@ -127,6 +127,7 @@ button, a { -webkit-tap-highlight-color: transparent; }
 .card-body h3 { font-size: 1.12rem; }
 .space-meta { display: flex; flex-wrap: wrap; gap: .4rem; margin: .9rem 0 1rem; }
 .space-meta > * { background: var(--surface-2); border: 1px solid var(--line); border-radius: 999px; color: var(--ink-2); font-size: .8rem; font-weight: 550; padding: .2rem .65rem; }
+.space-meta > .space-hours { background: transparent; border: 0; border-radius: 0; flex-basis: 100%; padding: .15rem 0; }
 .space-card .card-body > .button { margin: auto .55rem 0 0; }
 .space-card .card-body > .status + .button, .space-card .card-body > .button:first-of-type { margin-top: 1rem; }
 .status { align-items: center; color: var(--success); display: inline-flex; font-size: .82rem; font-weight: 650; gap: .4rem; }
@@ -208,6 +209,19 @@ button, a { -webkit-tap-highlight-color: transparent; }
 .form-card-heading p { color: var(--muted); margin-top: .35rem; }
 .form-grid { display: grid; gap: 1.1rem; grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .form-grid .full { grid-column: 1 / -1; }
+.space-schedule { border: 1px solid var(--line); border-radius: var(--r-md); margin: 0; min-width: 0; padding: 1rem; }
+.space-schedule legend { color: var(--ink-2); font-size: .95rem; font-weight: 700; padding: 0 .35rem; }
+.space-schedule > .field-hint { margin: 0 0 .8rem; }
+.schedule-days { display: grid; gap: .55rem; }
+.schedule-day-row { align-items: end; background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--r-sm); display: grid; gap: .7rem; grid-template-columns: minmax(7rem, .7fr) repeat(2, minmax(7rem, 1fr)); padding: .6rem .75rem; }
+.schedule-day-toggle { align-items: center; color: var(--ink-2); display: flex; font-size: .9rem; font-weight: 650; gap: .55rem; min-height: 2.8rem; }
+.schedule-day-toggle input { accent-color: var(--brand); height: 1rem; margin: 0; width: 1rem; }
+.schedule-day-row .field { gap: .25rem; }
+.schedule-day-row .field label { font-size: .75rem; }
+.schedule-day-row .field select { min-height: 2.5rem; padding: .45rem .65rem; }
+.schedule-day-row .field select:disabled { background-color: #f1f3f7; color: var(--muted); cursor: not-allowed; }
+.datetime-control { display: grid; gap: .5rem; grid-template-columns: minmax(0, 1fr) minmax(6rem, .72fr); }
+.datetime-control > * { min-width: 0; }
 .form-actions { align-items: center; display: flex; flex-wrap: wrap; gap: .8rem; margin-top: 1.4rem; }
 .form-note { color: var(--muted); font-size: .88rem; }
 .feedback { color: var(--muted); font-size: .92rem; line-height: 1.55; margin: .85rem 0; }
@@ -282,6 +296,8 @@ button, a { -webkit-tap-highlight-color: transparent; }
 .admin-section .filter-bar { background: var(--surface-2); margin: 0; }
 .admin-list { display: grid; gap: .65rem; }
 .admin-list-item { align-items: center; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-md); display: flex; flex-wrap: wrap; gap: .75rem 1rem; padding: 1rem 1.15rem; }
+.agenda-slot { border-left: 4px solid var(--success); }
+.agenda-slot .admin-list-details h3 { color: var(--success); }
 .admin-list-details { display: grid; flex: 1 1 16rem; gap: .3rem; min-width: 0; }
 .admin-list-details h3 { font-size: 1rem; }
 .admin-list-details p { color: var(--muted); font-size: .9rem; }
@@ -375,7 +391,244 @@ button, a { -webkit-tap-highlight-color: transparent; }
   .manager-space-status-form .field { max-width: none; width: 100%; }
   .profile-data > div { gap: .3rem; grid-template-columns: 1fr; }
   .agenda-dialog { padding: 1rem; }
+  .schedule-day-row { grid-template-columns: 1fr 1fr; }
+  .schedule-day-toggle { grid-column: 1 / -1; min-height: 1.5rem; }
 }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; }
+}
+
+/* ── Ajuste de composición: referencia Monect, paleta Reserva Campus ──
+   Se conservan los colores y fondos originales; los cambios se enfocan en
+   jerarquía, proporciones, distribución y adaptación a pantallas pequeñas. */
+:root {
+  --page-w: 1600px;
+  --page-gutter: clamp(20px, 4.5vw, 76px);
+}
+
+.site-header { position: sticky; }
+.nav { max-width: 1600px; min-height: 4.8rem; padding-inline: var(--page-gutter); }
+.brand { gap: .7rem; }
+.brand::after {
+  color: var(--ink);
+  content: "Reserva Campus";
+  font-size: 1rem;
+  font-weight: 750;
+  letter-spacing: -.035em;
+}
+.brand-logo { height: 2.15rem; }
+.nav-links { justify-content: flex-end; margin-left: auto; }
+.nav-links a { font-size: .89rem; padding: .58rem .82rem; }
+.nav-links [data-login-link] { margin-left: .4rem; }
+
+.page { padding-block: clamp(2rem, 4.2vw, 3.75rem) 5rem; }
+.page-intro {
+  margin-bottom: clamp(1.8rem, 3.5vw, 2.8rem);
+  max-width: 72rem;
+  padding-left: 1.1rem;
+  position: relative;
+}
+.page-intro::before {
+  background: var(--brand);
+  border-radius: 3px;
+  bottom: .25rem;
+  content: "";
+  left: 0;
+  position: absolute;
+  top: .2rem;
+  width: 3px;
+}
+.page-intro .eyebrow { margin-bottom: .65rem; }
+.page-intro h1 { font-size: clamp(2.1rem, 4vw, 3.2rem); letter-spacing: -.055em; }
+.page-intro > p:last-child { max-width: 64ch; }
+
+.hero {
+  border-radius: 1.35rem;
+  gap: clamp(2rem, 5vw, 5rem);
+  min-height: clamp(430px, 57vh, 620px);
+  padding: clamp(2.2rem, 6vw, 6rem);
+  position: relative;
+}
+.hero::after {
+  border: 1px solid rgba(255, 255, 255, .13);
+  border-radius: 50%;
+  content: "";
+  height: 30rem;
+  pointer-events: none;
+  position: absolute;
+  right: -12rem;
+  top: -22rem;
+  width: 30rem;
+}
+.hero > div:first-child { max-width: 720px; }
+.hero h1 {
+  font-size: clamp(3.1rem, 5vw, 5.2rem);
+  letter-spacing: -.07em;
+  line-height: .99;
+  max-width: 15ch;
+}
+.hero p { font-size: clamp(1rem, 1.4vw, 1.15rem); line-height: 1.7; max-width: 49ch; }
+.hero-art {
+  border: 1px solid rgba(255, 255, 255, .2);
+  border-radius: 1.1rem;
+  min-height: 290px;
+  position: relative;
+}
+.hero-art::before {
+  color: rgba(255, 255, 255, .72);
+  content: "RESERVAS · DISPONIBILIDAD · CAMPUS";
+  font-size: .62rem;
+  font-weight: 750;
+  letter-spacing: .12em;
+  position: absolute;
+  right: 1rem;
+  top: 1rem;
+}
+.calendar-illustration {
+  border: 1px solid var(--line);
+  border-radius: .85rem;
+  padding: 1.2rem;
+  transform: rotate(-2deg);
+  width: min(84%, 340px);
+}
+.calendar-illustration strong { font-size: .82rem; letter-spacing: .025em; text-transform: uppercase; }
+.calendar-row span { border-radius: .5rem; }
+
+.button { border-radius: .65rem; font-weight: 700; min-height: 2.85rem; }
+.button-primary:hover { box-shadow: var(--shadow-sm); }
+.button-outline:hover { box-shadow: var(--shadow-sm); }
+
+.section { margin-top: clamp(3.2rem, 5.5vw, 5rem); }
+.section-heading { margin-bottom: 1.35rem; }
+.section-heading h2 { font-size: clamp(1.5rem, 2.5vw, 2rem); letter-spacing: -.045em; }
+.section-heading p { max-width: 58ch; }
+.space-grid { gap: 1.15rem; }
+.space-card {
+  border-radius: .95rem;
+  transition: border-color .16s ease, box-shadow .16s ease;
+}
+.space-card:hover { box-shadow: var(--shadow-md); }
+.space-banner { align-items: flex-end; min-height: 6rem; padding: 1rem 1.2rem; }
+.card-body { min-height: 205px; padding: 1.3rem; }
+.card-body h3 { font-size: 1.15rem; line-height: 1.25; }
+.space-meta { gap: .45rem; }
+.step { min-height: 175px; padding: 1.35rem; }
+.step::before { border-radius: .65rem; height: 2.5rem; width: 2.5rem; }
+
+.catalog-layout { gap: clamp(1.3rem, 2.6vw, 2.4rem); grid-template-columns: minmax(250px, 300px) minmax(0, 1fr); }
+.catalog-tools { border-radius: 1rem; padding: 1.3rem; }
+.catalog-tools .filter-bar { gap: .85rem; }
+.catalog-tools .availability-search { margin-top: 1rem; padding-top: 1rem; }
+.catalog-results .section-heading { border-bottom: 1px solid var(--line); padding-bottom: 1rem; }
+.filter-bar { border-radius: .9rem; padding: 1rem; }
+.field label { font-size: .81rem; font-weight: 700; }
+.field input, .field select, .field textarea { border-radius: .62rem; min-height: 2.85rem; }
+
+.form-card { border-radius: 1rem; padding: clamp(1.25rem, 3vw, 2rem); }
+.form-card-heading { border-bottom: 1px solid var(--line); margin-bottom: 1.35rem; padding-bottom: 1rem; }
+.form-card-heading h2 { font-size: 1.28rem; letter-spacing: -.035em; }
+.form-card-heading p { font-size: .91rem; line-height: 1.6; }
+.reserve-layout { align-items: start; gap: 1.35rem; grid-template-columns: minmax(0, 1.12fr) minmax(330px, .88fr); }
+.reservation-item { border-left: 3px solid var(--brand); border-radius: .8rem; }
+.reservation-list { gap: .8rem; }
+.agenda-dialog { border-radius: 1rem; }
+.availability-note { border-radius: .7rem; }
+
+.login-shell {
+  align-items: stretch;
+  gap: 1rem;
+  grid-template-columns: minmax(0, 1.05fr) minmax(390px, .95fr);
+  max-width: 1280px;
+  min-height: calc(100svh - 9rem);
+  padding-block: clamp(2rem, 5vh, 4rem);
+}
+.login-aside { border-radius: 1.2rem; padding: clamp(2rem, 5vw, 4.5rem); }
+.login-logo { margin: 0 0 2rem; width: min(100%, 260px); }
+.login-aside h2 { font-size: clamp(1.8rem, 3.3vw, 2.65rem); letter-spacing: -.05em; line-height: 1.08; max-width: 14ch; }
+.login-aside ul { gap: .85rem; }
+.login-card {
+  align-self: stretch;
+  border-radius: 1.2rem;
+  box-shadow: var(--shadow-sm);
+  justify-content: center;
+  padding: clamp(1.6rem, 4vw, 3.5rem);
+}
+.login-card h1 { font-size: clamp(1.9rem, 3vw, 2.5rem); letter-spacing: -.055em; }
+.login-card .button { min-height: 3rem; }
+
+.profile-layout { gap: 1.1rem; grid-template-columns: minmax(250px, 330px) minmax(0, 1fr); }
+.profile-summary { justify-content: center; min-height: 300px; }
+.profile-details { padding: clamp(1.3rem, 3vw, 2rem); }
+.profile-data > div { padding: 1.05rem .2rem; }
+.profile-roles { border-top: 1px solid var(--line); margin-top: 1.1rem; padding-top: 1.25rem; }
+
+.admin-layout { gap: 1.25rem; grid-template-columns: 220px minmax(0, 1fr); }
+.admin-nav { border-radius: 1rem; padding: .65rem; }
+.admin-nav a { border-radius: .55rem; padding: .72rem .8rem; }
+.admin-section { border-radius: 1rem; padding: clamp(1.1rem, 2.5vw, 1.8rem); }
+.admin-section .section-heading { border-bottom: 1px solid var(--line); padding-bottom: .85rem; }
+.admin-section .form-card { border-radius: .8rem; box-shadow: none; }
+.admin-list-item { border-radius: .75rem; box-shadow: none; }
+.space-schedule { background: var(--surface-2); }
+.schedule-day-row { border-radius: .65rem; }
+
+.site-footer { margin-top: auto; padding-block: 1.4rem; }
+.site-footer div { font-size: .82rem; }
+
+@media (max-width: 1080px) {
+  .catalog-layout { grid-template-columns: 1fr; }
+  .catalog-tools { position: static; }
+  .catalog-tools .filter-bar { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .catalog-tools .filter-bar .button { grid-column: 1 / -1; }
+  .reserve-layout { grid-template-columns: 1fr; }
+}
+@media (max-width: 900px) {
+  .nav { align-items: center; flex-direction: row; gap: .8rem; }
+  .nav-links { flex: 0 1 auto; justify-content: flex-end; margin-left: auto; width: auto; }
+  .hero { min-height: 420px; }
+  .hero-art { min-height: 260px; }
+  .admin-layout { grid-template-columns: 1fr; }
+  .admin-nav { display: flex; overflow-x: auto; position: static; }
+  .admin-nav a { white-space: nowrap; }
+}
+@media (max-width: 760px) {
+  .login-shell { grid-template-columns: 1fr; min-height: 0; }
+  .login-aside { display: flex; gap: 1rem; padding: 1.5rem; }
+  .login-logo { margin: 0; width: 160px; }
+  .login-aside h2 { font-size: 1.7rem; max-width: 24ch; }
+  .login-aside ul { display: none; }
+  .login-card { min-height: 420px; }
+  .steps { grid-template-columns: 1fr; }
+}
+@media (max-width: 600px) {
+  .nav { align-items: flex-start; flex-direction: column; gap: .5rem; padding-block: .7rem; }
+  .brand-logo { height: 2rem; }
+  .nav-links { flex-wrap: wrap; justify-content: flex-start; margin: 0; width: 100%; }
+  .nav-links a { padding: .45rem .65rem; }
+  .nav-links [data-login-link], .nav-links [data-profile-link] { margin-left: 0; }
+  .page { padding: 1.5rem 1rem 3rem; }
+  .page-intro { padding-left: .9rem; }
+  .hero { grid-template-columns: 1fr; min-height: 0; padding: 1.5rem; }
+  .hero h1 { font-size: clamp(2.5rem, 9vw, 3.7rem); max-width: 16ch; }
+  .hero-art { min-height: 220px; }
+  .hero-art::before { font-size: .52rem; }
+  .calendar-illustration { width: min(88%, 320px); }
+  .section-heading { align-items: flex-start; flex-direction: column; }
+  .catalog-tools .filter-bar, .filter-bar, .admin-filter, .admin-space-filter, .form-grid { grid-template-columns: 1fr; }
+  .catalog-tools .filter-bar .button, .form-grid .full { grid-column: auto; }
+  .form-actions { align-items: stretch; flex-direction: column; }
+  .form-actions .button { width: 100%; }
+  .availability-note { flex-direction: column; gap: .35rem; }
+  .reservation-item { align-items: flex-start; flex-direction: column; }
+  .profile-layout { grid-template-columns: 1fr; }
+  .profile-summary { min-height: 260px; }
+  .profile-data > div { gap: .3rem; grid-template-columns: 1fr; }
+  .agenda-dialog { padding: 1rem; }
+  .schedule-day-row { grid-template-columns: 1fr 1fr; }
+  .schedule-day-toggle { grid-column: 1 / -1; min-height: 1.5rem; }
+  .login-aside { align-items: flex-start; flex-direction: column; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .space-card, .button, .nav-links a { transition: none; }
+  .calendar-illustration { transform: none; }
 }

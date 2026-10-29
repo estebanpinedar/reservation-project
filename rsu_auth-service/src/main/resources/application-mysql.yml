@@ -1,0 +1,17 @@
+spring:
+  datasource:
+    url: jdbc:mariadb://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:space_reservation}
+    username: ${DB_USER:root}
+    password: ${DB_PASSWORD:}
+    driver-class-name: org.mariadb.jdbc.Driver
+  jpa:
+    properties:
+      hibernate:
+        type:
+          preferred_uuid_jdbc_type: CHAR
+        jdbc:
+          time_zone: UTC
+  flyway:
+    locations: classpath:db/migration_mysql
+    baseline-on-migrate: true
+    baseline-version: 2

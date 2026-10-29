@@ -2,7 +2,6 @@ package co.edu.uniajc.rsu_auth_service.repository;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -15,7 +14,7 @@ import jakarta.persistence.LockModeType;
 import co.edu.uniajc.rsu_auth_service.model.Space;
 import co.edu.uniajc.rsu_auth_service.model.SpaceStatus;
 
-public interface SpaceRepository extends JpaRepository<Space, UUID> {
+public interface SpaceRepository extends JpaRepository<Space, Long> {
     boolean existsByNameIgnoreCase(String name);
 
     @EntityGraph(attributePaths = "spaceType")
@@ -66,12 +65,12 @@ public interface SpaceRepository extends JpaRepository<Space, UUID> {
             @Param("minimumCapacity") Integer minimumCapacity);
 
     @EntityGraph(attributePaths = "spaceType")
-    Optional<Space> findByIdAndStatus(UUID id, SpaceStatus status);
+    Optional<Space> findByIdAndStatus(Long id, SpaceStatus status);
 
     @EntityGraph(attributePaths = "spaceType")
-    Optional<Space> findWithTypeById(UUID id);
+    Optional<Space> findWithTypeById(Long id);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select space from Space space join fetch space.spaceType where space.id = :id and space.status = :status")
-    Optional<Space> lockByIdAndStatus(@Param("id") UUID id, @Param("status") SpaceStatus status);
+    Optional<Space> lockByIdAndStatus(@Param("id") Long id, @Param("status") SpaceStatus status);
 }

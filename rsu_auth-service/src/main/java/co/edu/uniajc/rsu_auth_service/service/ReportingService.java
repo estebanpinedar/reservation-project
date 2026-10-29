@@ -9,7 +9,6 @@ import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -43,7 +42,7 @@ public class ReportingService {
         if (startAt == null || endAt == null || !startAt.isBefore(endAt)) {
             throw new BadRequestException("Start time must be before end time");
         }
-        Map<UUID, UsageAccumulator> usage = new LinkedHashMap<>();
+        Map<Long, UsageAccumulator> usage = new LinkedHashMap<>();
         for (Space space : spaceRepository.findAllByOrderByNameAsc()) {
             usage.put(space.getId(), new UsageAccumulator(space.getName()));
         }

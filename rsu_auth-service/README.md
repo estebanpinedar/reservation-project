@@ -5,23 +5,20 @@ Backend del sistema de reserva de espacios institucionales. La interfaz estátic
 ## Incluye
 
 - Backend Java 21 y Spring Boot con punto de salud y autenticación JWT.
-- Esquema versionado con Flyway para PostgreSQL y perfil local H2.
+- Esquema MariaDB versionado con Flyway para el backend; XAMPP/phpMyAdmin es la base de datos local.
 - Datos iniciales de catálogo.
 - Notas de arquitectura y backlog técnico.
 
-## Ejecutar con H2 persistente
+## Ejecutar con MySQL/MariaDB de XAMPP
 
-```bash
-JAVA_HOME=/path/to/jdk-21 mvn spring-boot:run
-```
+Inicia MySQL desde el panel de XAMPP y crea la base `space_reservation` desde phpMyAdmin si todavía no existe.
+La configuración predeterminada del backend conecta a `localhost:3306`, base `space_reservation`, usuario
+`root` y contraseña vacía. Si tus datos son distintos, define `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER` y
+`DB_PASSWORD` en la ejecución de Eclipse.
 
-La configuración local predeterminada usa H2 en un archivo dentro de la carpeta del usuario
-(`rsu_auth_service_space_reservation.mv.db`), por lo que las cuentas y reservas permanecen después
-de cerrar o reiniciar el backend. No necesitas iniciar PostgreSQL para el desarrollo local.
-
-Consulta `GET http://localhost:8080/api/v1/health` para verificar el arranque. La base H2 en memoria
-usada anteriormente no se migra automáticamente; si contenía datos, expórtalos antes de cambiar la
-configuración y reiniciar el backend.
+No es necesario activar un perfil para usar MySQL. Al iniciar `RsuAuthServiceApplication`, Flyway crea las
+tablas pendientes y carga el catálogo. Consulta `GET http://localhost:8080/api/v1/health` para verificar el
+arranque.
 
 ## Autenticación local
 
@@ -84,18 +81,16 @@ rol `MANAGER` tienen las mismas acciones solo en espacios asignados. Un bloqueo 
 solapadas. Las creaciones y cancelaciones de reservas y bloqueos, y las operaciones administrativas, se registran
 en `auditorias`.
 
-## Ejecutar con PostgreSQL
-
-```bash
-docker compose up -d
-SPRING_PROFILES_ACTIVE=postgres JAVA_HOME=/path/to/jdk-21 mvn spring-boot:run
-```
-
-Antes de un despliegue no local, sustituye las credenciales por variables de entorno.
+Al iniciar `RsuAuthServiceApplication`, Flyway crea las tablas y carga los roles y espacios iniciales. Todas
+las tablas de la aplicación usan IDs numéricos y las tablas de relación
+`usuario_roles` y `espacio_responsables` también tienen su propio `id`; los IDs de rol son 1–4 y los demás se
+generan automáticamente. En las tablas creadas por el sistema, `id` es la primera columna. Las migraciones
+convierten las claves existentes y mantienen usuarios, espacios, asignaciones y relaciones. Si una base ya
+tenía tablas antes de activar Flyway, la migración se aplica a sus datos sin borrar la base.
 
 ## Despliegue HTTPS
 
-El perfil `prod` usa PostgreSQL y requiere `DB_URL`, `DB_USER`, `DB_PASSWORD`, `APP_SECURITY_JWT_SECRET` (mínimo
+El perfil `prod` usa MariaDB y requiere `DB_URL`, `DB_USER`, `DB_PASSWORD`, `APP_SECURITY_JWT_SECRET` (mínimo
 32 bytes) y `APP_WEB_ALLOWED_ORIGINS` (orígenes HTTPS exactos de la interfaz). Arráncalo con
 `SPRING_PROFILES_ACTIVE=prod`. El perfil fuerza HTTPS en las solicitudes y procesa `X-Forwarded-*`; despliega la
 API detrás de un proxy TLS de confianza que termine HTTPS y reemplace esas cabeceras. No expongas directamente el

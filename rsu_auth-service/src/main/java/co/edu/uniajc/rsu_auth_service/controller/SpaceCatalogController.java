@@ -9,7 +9,6 @@ import co.edu.uniajc.rsu_auth_service.dto.SpaceAgendaResponse;
 import co.edu.uniajc.rsu_auth_service.model.SpaceStatus;
 
 import java.util.List;
-import java.util.UUID;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.net.URI;
@@ -54,15 +53,15 @@ public class SpaceCatalogController {
     @PreAuthorize("hasRole('ADMINISTRATOR')")
     public ResponseEntity<SpaceTypeResponse> createType(@AuthenticationPrincipal String userId,
             @jakarta.validation.Valid @RequestBody SaveSpaceTypeRequest request) {
-        SpaceTypeResponse response = spaceCatalogService.createType(UUID.fromString(userId), request);
+        SpaceTypeResponse response = spaceCatalogService.createType(Long.valueOf(userId), request);
         return ResponseEntity.created(URI.create("/api/v1/space-types/" + response.id())).body(response);
     }
 
     @PatchMapping("/space-types/{typeId}")
     @PreAuthorize("hasRole('ADMINISTRATOR')")
     public ResponseEntity<SpaceTypeResponse> updateType(@AuthenticationPrincipal String userId,
-            @PathVariable UUID typeId, @jakarta.validation.Valid @RequestBody SaveSpaceTypeRequest request) {
-        return ResponseEntity.ok(spaceCatalogService.updateType(UUID.fromString(userId), typeId, request));
+            @PathVariable Long typeId, @jakarta.validation.Valid @RequestBody SaveSpaceTypeRequest request) {
+        return ResponseEntity.ok(spaceCatalogService.updateType(Long.valueOf(userId), typeId, request));
     }
 
     @GetMapping("/spaces")
@@ -84,7 +83,7 @@ public class SpaceCatalogController {
             @RequestParam(required = false) SpaceStatus status) {
         boolean administrator = authentication.getAuthorities().stream()
                 .anyMatch(authority -> authority.getAuthority().equals("ROLE_ADMINISTRATOR"));
-        return ResponseEntity.ok(spaceCatalogService.searchForManagement(UUID.fromString(userId), administrator,
+        return ResponseEntity.ok(spaceCatalogService.searchForManagement(Long.valueOf(userId), administrator,
                 query, type, minimumCapacity, status));
     }
 
@@ -92,25 +91,25 @@ public class SpaceCatalogController {
     @PreAuthorize("hasRole('ADMINISTRATOR')")
     public ResponseEntity<SpaceResponse> createSpace(@AuthenticationPrincipal String userId,
             @jakarta.validation.Valid @RequestBody SaveSpaceRequest request) {
-        SpaceResponse response = spaceCatalogService.createSpace(UUID.fromString(userId), request);
+        SpaceResponse response = spaceCatalogService.createSpace(Long.valueOf(userId), request);
         return ResponseEntity.created(URI.create("/api/v1/spaces/" + response.id())).body(response);
     }
 
     @PatchMapping("/spaces/{spaceId}")
     @PreAuthorize("hasRole('ADMINISTRATOR')")
     public ResponseEntity<SpaceResponse> updateSpace(@AuthenticationPrincipal String userId,
-            @PathVariable UUID spaceId, @jakarta.validation.Valid @RequestBody SaveSpaceRequest request) {
-        return ResponseEntity.ok(spaceCatalogService.updateSpace(UUID.fromString(userId), spaceId, request));
+            @PathVariable Long spaceId, @jakarta.validation.Valid @RequestBody SaveSpaceRequest request) {
+        return ResponseEntity.ok(spaceCatalogService.updateSpace(Long.valueOf(userId), spaceId, request));
     }
 
     @PatchMapping("/spaces/{spaceId}/status")
     @PreAuthorize("hasAnyRole('ADMINISTRATOR', 'MANAGER')")
     public ResponseEntity<SpaceResponse> changeStatus(@AuthenticationPrincipal String userId,
             Authentication authentication,
-            @PathVariable UUID spaceId, @jakarta.validation.Valid @RequestBody UpdateSpaceStatusRequest request) {
+            @PathVariable Long spaceId, @jakarta.validation.Valid @RequestBody UpdateSpaceStatusRequest request) {
         boolean administrator = authentication.getAuthorities().stream()
                 .anyMatch(authority -> authority.getAuthority().equals("ROLE_ADMINISTRATOR"));
-        return ResponseEntity.ok(spaceCatalogService.changeStatus(UUID.fromString(userId), administrator,
+        return ResponseEntity.ok(spaceCatalogService.changeStatus(Long.valueOf(userId), administrator,
                 spaceId, request.status()));
     }
 
@@ -123,13 +122,13 @@ public class SpaceCatalogController {
     }
 
     @GetMapping("/spaces/{spaceId}/agenda")
-    public ResponseEntity<SpaceAgendaResponse> agenda(@PathVariable UUID spaceId,
+    public ResponseEntity<SpaceAgendaResponse> agenda(@PathVariable Long spaceId,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
         return ResponseEntity.ok(spaceCatalogService.agenda(spaceId, date));
     }
 
     @GetMapping("/spaces/{spaceId}")
-    public ResponseEntity<SpaceResponse> getById(@PathVariable UUID spaceId) {
+    public ResponseEntity<SpaceResponse> getById(@PathVariable Long spaceId) {
         return ResponseEntity.ok(spaceCatalogService.findActiveById(spaceId));
     }
 }

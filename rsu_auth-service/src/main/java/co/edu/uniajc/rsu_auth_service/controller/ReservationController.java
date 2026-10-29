@@ -8,7 +8,6 @@ import co.edu.uniajc.rsu_auth_service.model.ReservationStatus;
 
 import java.net.URI;
 import java.util.List;
-import java.util.UUID;
 import java.time.OffsetDateTime;
 
 import jakarta.validation.Valid;
@@ -42,7 +41,7 @@ public class ReservationController {
     @PreAuthorize("hasAnyRole('USER', 'MANAGER', 'ADMINISTRATOR')")
     public ResponseEntity<ReservationResponse> create(@AuthenticationPrincipal String userId,
             @Valid @RequestBody CreateReservationRequest request) {
-        ReservationResponse response = reservationService.create(UUID.fromString(userId), request);
+        ReservationResponse response = reservationService.create(Long.valueOf(userId), request);
         return ResponseEntity.created(URI.create("/api/v1/reservations/" + response.id())).body(response);
     }
 
@@ -51,7 +50,7 @@ public class ReservationController {
             @RequestParam(required = false) ReservationStatus status,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime startAt,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime endAt) {
-        return ResponseEntity.ok(reservationService.listMine(UUID.fromString(userId), status, startAt, endAt));
+        return ResponseEntity.ok(reservationService.listMine(Long.valueOf(userId), status, startAt, endAt));
     }
 
     @GetMapping
@@ -59,17 +58,17 @@ public class ReservationController {
     public ResponseEntity<List<ReservationOverviewResponse>> listAgenda(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime startAt,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime endAt,
-            @RequestParam(required = false) UUID spaceId,
+            @RequestParam(required = false) Long spaceId,
             @RequestParam(required = false) ReservationStatus status) {
         return ResponseEntity.ok(reservationService.listAgenda(startAt, endAt, spaceId, status));
     }
 
     @PatchMapping("/{reservationId}/cancel")
-    public ResponseEntity<ReservationResponse> cancel(@PathVariable UUID reservationId,
+    public ResponseEntity<ReservationResponse> cancel(@PathVariable Long reservationId,
             @AuthenticationPrincipal String userId, Authentication authentication,
             @Valid @RequestBody CancelReservationRequest request) {
         boolean isAdministrator = authentication.getAuthorities().stream()
                 .anyMatch(authority -> authority.getAuthority().equals("ROLE_ADMINISTRATOR"));
-        return ResponseEntity.ok(reservationService.cancel(reservationId, UUID.fromString(userId), isAdministrator, request));
+        return ResponseEntity.ok(reservationService.cancel(reservationId, Long.valueOf(userId), isAdministrator, request));
     }
 }

@@ -148,7 +148,104 @@ function titleCase(value) {
 }
 
 function formatDate(value) {
-  return new Intl.DateTimeFormat("es-CO", { dateStyle: "medium", timeStyle: "short" }).format(new Date(value));
+  return new Intl.DateTimeFormat("es-CO", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    hourCycle: "h23",
+    timeZone: "America/Bogota",
+  }).format(new Date(value));
+}
+
+function bogotaDateString(value = new Date()) {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "America/Bogota",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(value);
+  const part = (type) => parts.find((item) => item.type === type)?.value;
+  return `${part("year")}-${part("month")}-${part("day")}`;
+}
+
+function availableAgendaSlots(date, entries, opensAt, closesAt) {
+  if (!opensAt || !closesAt) return [];
+  // The API interprets agenda dates in America/Bogota, which currently uses UTC-5 year-round.
+  const halfHour = 30 * 60 * 1000;
+  const dayStart = new Date(`${date}T${String(opensAt).slice(0, 8)}-05:00`).getTime();
+  const dayEnd = new Date(`${date}T${String(closesAt).slice(0, 8)}-05:00`).getTime();
+  if (!Number.isFinite(dayStart) || !Number.isFinite(dayEnd) || dayStart >= dayEnd) return [];
+  const now = Date.now();
+  let cursor = date === bogotaDateString(new Date(now))
+    ? Math.max(dayStart, Math.floor(now / halfHour) * halfHour + halfHour)
+    : dayStart;
+  const occupied = entries
+    .map((entry) => ({
+      start: Math.max(dayStart, new Date(entry.startAt).getTime()),
+      end: Math.min(dayEnd, new Date(entry.endAt).getTime()),
+    }))
+    .filter((period) => period.start < period.end)
+    .sort((first, second) => first.start - second.start);
+  const slots = [];
+
+  for (const period of occupied) {
+    if (period.end <= cursor) continue;
+    const slotStart = Math.ceil(cursor / halfHour) * halfHour;
+    const slotEnd = Math.floor(period.start / halfHour) * halfHour;
+    if (slotStart < slotEnd) slots.push({ start: slotStart, end: slotEnd });
+    cursor = Math.max(cursor, period.end);
+    if (cursor >= dayEnd) break;
+  }
+
+  const finalSlotStart = Math.ceil(cursor / halfHour) * halfHour;
+  if (finalSlotStart < dayEnd) slots.push({ start: finalSlotStart, end: dayEnd });
+  return slots;
+}
+
+function spaceScheduleSummary(schedules = []) {
+  const dayNames = [
+    ["MONDAY", "Lun"], ["TUESDAY", "Mar"], ["WEDNESDAY", "Mié"], ["THURSDAY", "Jue"],
+    ["FRIDAY", "Vie"], ["SATURDAY", "Sáb"], ["SUNDAY", "Dom"],
+  ];
+  const order = new Map(dayNames.map(([day], index) => [day, index]));
+  const entries = schedules.map((schedule) => ({
+    ...schedule,
+    index: order.get(schedule.dayOfWeek),
+    opensAt: String(schedule.opensAt || "").slice(0, 5),
+    closesAt: String(schedule.closesAt || "").slice(0, 5),
+  })).filter((schedule) => schedule.index !== undefined)
+    .sort((first, second) => first.index - second.index);
+  if (!entries.length) return "Sin horario configurado";
+
+  const groups = [];
+  for (const schedule of entries) {
+    const previous = groups.at(-1);
+    if (previous && previous.closesAt === schedule.closesAt && previous.opensAt === schedule.opensAt
+      && previous.endIndex + 1 === schedule.index) {
+      previous.endIndex = schedule.index;
+    } else {
+      groups.push({ startIndex: schedule.index, endIndex: schedule.index,
+        opensAt: schedule.opensAt, closesAt: schedule.closesAt });
+    }
+  }
+  return groups.map((group) => {
+    const first = dayNames[group.startIndex][1];
+    const last = dayNames[group.endIndex][1];
+    const days = first === last ? first : `${first}–${last}`;
+    return `${days} ${group.opensAt}–${group.closesAt}`;
+  }).join(" · ");
+}
+
+function formatAgendaTime(timestamp, isDayEnd = false) {
+  if (isDayEnd) return "23:59";
+  return new Intl.DateTimeFormat("es-CO", {
+    timeZone: "America/Bogota",
+    hour: "2-digit",
+    minute: "2-digit",
+    hourCycle: "h23",
+  }).format(new Date(timestamp));
 }
 
 function renderSpaceCard(space) {
@@ -160,6 +257,7 @@ function renderSpaceCard(space) {
   const metadata = makeElement("div", "space-meta");
   metadata.append(makeElement("span", "", space.location));
   metadata.append(makeElement("span", "", `${space.capacity} personas`));
+  metadata.append(makeElement("span", "space-hours", `Horario: ${spaceScheduleSummary(space.schedules)}`));
   body.append(metadata);
   body.append(makeElement("span", "status", "Espacio activo"));
 
@@ -173,7 +271,8 @@ function renderSpaceCard(space) {
       const dialog = document.querySelector("[data-space-agenda-dialog]");
       const agendaForm = document.querySelector("[data-space-agenda-form]");
       agendaForm.elements.spaceId.value = space.id;
-      agendaForm.elements.date.value = localDateString(new Date());
+      agendaForm.elements.date.value = bogotaDateString(new Date());
+      agendaForm.elements.date.min = bogotaDateString(new Date());
       document.querySelector("[data-space-agenda-title]").textContent = titleCase(`Agenda · ${space.name}`);
       dialog.showModal();
       agendaForm.requestSubmit();
@@ -296,16 +395,21 @@ async function loadSpaceCatalog() {
     try {
       const params = new URLSearchParams({ date });
       const agenda = await apiRequest(`/api/v1/spaces/${spaceId}/agenda?${params}`);
-      if (!agenda.entries.length) {
-        showMessage(agendaFeedback, "No hay reservas ni bloqueos para esa fecha.");
+      const slots = availableAgendaSlots(date, agenda.entries, agenda.opensAt, agenda.closesAt);
+      if (!slots.length) {
+        showMessage(agendaFeedback, agenda.opensAt
+          ? "No hay horarios disponibles para reservar en esta fecha."
+          : "Este espacio no tiene atención programada para el día seleccionado.");
         return;
       }
-      showMessage(agendaFeedback, `${agenda.entries.length} elemento(s) en la agenda de ${agenda.spaceName}.`);
-      agenda.entries.forEach((entry) => {
-        const item = makeElement("article", "admin-list-item");
+      const slotCount = slots.length === 1 ? "1 franja disponible" : `${slots.length} franjas disponibles`;
+      showMessage(agendaFeedback,
+        `Atención ${String(agenda.opensAt).slice(0, 5)}–${String(agenda.closesAt).slice(0, 5)} · ${slotCount} para reservar.`);
+      slots.forEach((slot) => {
+        const item = makeElement("article", "admin-list-item agenda-slot");
         const details = makeElement("div", "admin-list-details");
-        details.append(makeElement("h3", "", titleCase(entry.label)));
-        details.append(makeElement("p", "", `${formatDate(entry.startAt)} – ${formatDate(entry.endAt)}`));
+        details.append(makeElement("h3", "", "Disponible para reservar"));
+        details.append(makeElement("p", "", `${formatAgendaTime(slot.start)} – ${formatAgendaTime(slot.end)}`));
         item.append(details);
         agendaEntries.append(item);
       });
@@ -548,9 +652,38 @@ function configureAuthForm() {
 }
 
 function setLocalDateMinimum(input) {
-  const now = new Date();
-  now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
-  input.min = now.toISOString().slice(0, 16);
+  const now = new Date(Date.now() + 60000);
+  now.setSeconds(0, 0);
+  if (now.getTime() < Date.now() + 60000) now.setMinutes(now.getMinutes() + 1);
+  const localMinimum = new Date(now.getTime() - now.getTimezoneOffset() * 60000);
+  input.min = localMinimum.toISOString().slice(0, 16);
+}
+
+function setDateMinimum(input) {
+  input.min = localDateString(new Date());
+}
+
+function populateHalfHourTimes(select) {
+  select.replaceChildren(new Option("Selecciona una hora", ""));
+  for (let hour = 0; hour < 24; hour += 1) {
+    for (const minute of [0, 30]) {
+      const time = `${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}`;
+      select.add(new Option(time, time));
+    }
+  }
+}
+
+function nextHalfHourDateTime() {
+  const threshold = Date.now() + 60000;
+  const next = new Date(threshold);
+  next.setSeconds(0, 0);
+  if (next.getTime() < threshold) next.setMinutes(next.getMinutes() + 1);
+  const remainder = next.getMinutes() % 30;
+  if (remainder) next.setMinutes(next.getMinutes() + 30 - remainder);
+  return {
+    date: localDateString(next),
+    time: `${String(next.getHours()).padStart(2, "0")}:${String(next.getMinutes()).padStart(2, "0")}`,
+  };
 }
 
 async function loadReservationPage() {
@@ -561,16 +694,58 @@ async function loadReservationPage() {
   const historyFilterForm = document.querySelector("[data-history-filter-form]");
   const reservationList = document.querySelector("[data-reservation-list]");
   const sessionNote = document.querySelector("[data-session-note]");
-  const startInput = form.elements.start;
-  const endInput = form.elements.end;
-  setLocalDateMinimum(startInput);
-  setLocalDateMinimum(endInput);
+  const dateInput = form.elements.date;
+  const startTimeSelect = form.elements.startTime;
+  const endTimeSelect = form.elements.endTime;
+  const scheduleHint = form.querySelector("[data-reservation-schedule-hint]");
+  let reservationSpaces = [];
+  setDateMinimum(dateInput);
+  [startTimeSelect, endTimeSelect].forEach((select) => populateHalfHourTimes(select));
+  const updateReservationTimes = () => {
+    const weekdayNames = ["SUNDAY", "MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY"];
+    const selectedSpace = reservationSpaces.find((space) => String(space.id) === select.value);
+    const dayIndex = dateInput.value ? new Date(`${dateInput.value}T12:00:00`).getDay() : -1;
+    const schedule = selectedSpace?.schedules?.find((item) => item.dayOfWeek === weekdayNames[dayIndex]);
+    scheduleHint.textContent = schedule
+      ? `Horario de atención para este día: ${String(schedule.opensAt).slice(0, 5)}–${String(schedule.closesAt).slice(0, 5)}.`
+      : selectedSpace && dateInput.value
+        ? "Este espacio no tiene atención programada para el día seleccionado."
+        : "Selecciona un espacio y una fecha para consultar el horario disponible.";
+    const minimum = nextHalfHourDateTime();
+    [startTimeSelect, endTimeSelect].forEach((timeSelect) => {
+      [...timeSelect.options].forEach((option) => {
+        if (!option.value) return;
+        const tooEarly = dateInput.value < minimum.date
+          || (dateInput.value === minimum.date && option.value < minimum.time);
+        const opensAt = String(schedule?.opensAt || "").slice(0, 5);
+        const closesAt = String(schedule?.closesAt || "").slice(0, 5);
+        const outsideSchedule = !schedule || (timeSelect === startTimeSelect
+          ? option.value < opensAt || option.value >= closesAt
+          : option.value <= opensAt || option.value > closesAt);
+        const wrongOrder = timeSelect === startTimeSelect
+          ? endTimeSelect.value && option.value >= endTimeSelect.value
+          : startTimeSelect.value && option.value <= startTimeSelect.value;
+        option.disabled = tooEarly || outsideSchedule || Boolean(wrongOrder);
+      });
+      if (timeSelect.selectedOptions[0]?.disabled) timeSelect.value = "";
+    });
+  };
+  updateReservationTimes();
+  dateInput.addEventListener("focus", () => setDateMinimum(dateInput));
+  dateInput.addEventListener("change", updateReservationTimes);
+  select.addEventListener("change", updateReservationTimes);
+  [startTimeSelect, endTimeSelect].forEach((timeSelect) => {
+    timeSelect.addEventListener("focus", updateReservationTimes);
+    timeSelect.addEventListener("change", updateReservationTimes);
+  });
 
   try {
     const spaces = await apiRequest("/api/v1/spaces");
+    reservationSpaces = spaces;
     select.replaceChildren(new Option("Selecciona un espacio", ""));
     for (const space of spaces) select.add(new Option(`${titleCase(space.name)} · ${space.capacity} personas`, space.id));
     select.value = new URLSearchParams(window.location.search).get("space") || "";
+    updateReservationTimes();
   } catch (error) {
     select.replaceChildren(new Option("No se pudo cargar el catálogo", ""));
     showMessage(formFeedback, error.message, "error");
@@ -590,10 +765,30 @@ async function loadReservationPage() {
       window.location.href = "login.html?next=reservations.html";
       return;
     }
-    const startAt = new Date(startInput.value);
-    const endAt = new Date(endInput.value);
+    setDateMinimum(dateInput);
+    updateReservationTimes();
+    if (!startTimeSelect.value || !endTimeSelect.value) {
+      const selectedSpace = reservationSpaces.find((space) => String(space.id) === select.value);
+      const weekdayNames = ["SUNDAY", "MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY"];
+      const dayIndex = dateInput.value ? new Date(`${dateInput.value}T12:00:00`).getDay() : -1;
+      const hasSchedule = selectedSpace?.schedules?.some((item) => item.dayOfWeek === weekdayNames[dayIndex]);
+      showMessage(formFeedback, hasSchedule
+        ? "Selecciona horas dentro del horario del espacio y en intervalos de 30 minutos."
+        : "El espacio no tiene atención programada para el día seleccionado.", "error");
+      return;
+    }
+    const startAt = new Date(`${dateInput.value}T${startTimeSelect.value}`);
+    const endAt = new Date(`${dateInput.value}T${endTimeSelect.value}`);
     if (!Number.isFinite(startAt.getTime()) || !Number.isFinite(endAt.getTime()) || startAt >= endAt) {
       showMessage(formFeedback, "La hora de inicio debe ser anterior a la finalización.", "error");
+      return;
+    }
+    if (startAt <= new Date()) {
+      showMessage(formFeedback, "La hora de inicio debe ser posterior a la hora actual. Selecciona otro horario.", "error");
+      return;
+    }
+    if (![startTimeSelect.value, endTimeSelect.value].every((time) => /^\d{2}:(00|30)$/.test(time))) {
+      showMessage(formFeedback, "Las horas de inicio y finalización deben estar en intervalos de 30 minutos (00 o 30).", "error");
       return;
     }
 
@@ -613,12 +808,17 @@ async function loadReservationPage() {
         },
       });
       form.reset();
-      setLocalDateMinimum(startInput);
-      setLocalDateMinimum(endInput);
+      setDateMinimum(dateInput);
+      updateReservationTimes();
       showMessage(formFeedback, "Reserva creada. Puedes consultar su estado en Mis reservas.", "success");
       await loadMyReservations();
     } catch (error) {
-      showMessage(formFeedback, error.message, "error");
+      const message = error.message.includes("Start time must be in the future")
+        ? "La hora de inicio debe ser posterior a la hora actual. Selecciona otro horario."
+        : error.message.includes("End time must be in the future")
+          ? "La hora de finalización debe ser posterior a la hora actual."
+          : error.message;
+      showMessage(formFeedback, message, "error");
     } finally {
       submit.disabled = false;
     }
@@ -716,7 +916,54 @@ function fillSpaceOptions(select, spaces, placeholder) {
   const previousValue = select.value;
   select.replaceChildren(new Option(placeholder, ""));
   spaces.forEach((space) => select.add(new Option(`${titleCase(space.name)} · ${space.location}`, space.id)));
-  if (spaces.some((space) => space.id === previousValue)) select.value = previousValue;
+  if (spaces.some((space) => String(space.id) === previousValue)) select.value = previousValue;
+}
+
+function setSpaceScheduleForm(form, schedules = null) {
+  const defaults = {
+    MONDAY: ["07:00", "22:00"], TUESDAY: ["07:00", "22:00"], WEDNESDAY: ["07:00", "22:00"],
+    THURSDAY: ["07:00", "22:00"], FRIDAY: ["07:00", "22:00"], SATURDAY: ["08:00", "18:00"],
+    SUNDAY: ["08:00", "18:00"],
+  };
+  const byDay = new Map((schedules || []).map((schedule) => [schedule.dayOfWeek, schedule]));
+  form.querySelectorAll("[data-schedule-row]").forEach((row) => {
+    const checkbox = row.querySelector("[data-schedule-day]");
+    const opens = row.querySelector("[data-schedule-open]");
+    const closes = row.querySelector("[data-schedule-close]");
+    if (!opens.options.length) {
+      for (let minutes = 0; minutes <= 23 * 60 + 30; minutes += 30) {
+        const hour = String(Math.floor(minutes / 60)).padStart(2, "0");
+        const minute = String(minutes % 60).padStart(2, "0");
+        const value = `${hour}:${minute}`;
+        opens.add(new Option(value, value));
+        closes.add(new Option(value, value));
+      }
+      closes.add(new Option("23:59", "23:59"));
+    }
+    const schedule = byDay.get(checkbox.value);
+    const [defaultOpens, defaultCloses] = defaults[checkbox.value];
+    checkbox.checked = schedules === null
+      ? ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY"].includes(checkbox.value)
+      : Boolean(schedule);
+    opens.value = String(schedule?.opensAt || defaultOpens).slice(0, 5);
+    closes.value = String(schedule?.closesAt || defaultCloses).slice(0, 5);
+    opens.disabled = !checkbox.checked;
+    closes.disabled = !checkbox.checked;
+    checkbox.onchange = () => {
+      opens.disabled = !checkbox.checked;
+      closes.disabled = !checkbox.checked;
+    };
+  });
+}
+
+function getSpaceScheduleFormValues(form) {
+  return [...form.querySelectorAll("[data-schedule-row]")]
+    .filter((row) => row.querySelector("[data-schedule-day]").checked)
+    .map((row) => ({
+      dayOfWeek: row.querySelector("[data-schedule-day]").value,
+      opensAt: row.querySelector("[data-schedule-open]").value,
+      closesAt: row.querySelector("[data-schedule-close]").value,
+    }));
 }
 
 function renderAdminSpaces(spaces = adminSpaces) {
@@ -732,6 +979,7 @@ function renderAdminSpaces(spaces = adminSpaces) {
     const details = makeElement("div", "admin-list-details");
     details.append(makeElement("h3", "", titleCase(space.name)));
     details.append(makeElement("p", "", `${titleCase(space.type?.name || "Sin tipo")} · ${space.location} · ${space.capacity} personas`));
+    details.append(makeElement("p", "", `Horario: ${spaceScheduleSummary(space.schedules)}`));
     details.append(makeElement("span", "admin-status", statusLabel(space.status)));
     const edit = makeElement("button", "button button-outline", "Editar");
     edit.type = "button";
@@ -744,6 +992,7 @@ function renderAdminSpaces(spaces = adminSpaces) {
       form.elements.capacity.value = space.capacity;
       form.elements.description.value = space.description || "";
       form.elements.status.value = space.status;
+      setSpaceScheduleForm(form, space.schedules || []);
       form.querySelector("[data-space-submit]").textContent = "Guardar cambios";
       form.querySelector("[data-space-reset]").hidden = false;
       form.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -1113,6 +1362,8 @@ async function loadAdminPage() {
   document.querySelectorAll("[data-manager-only]").forEach((section) => { section.hidden = isAdministrator; });
   showMessage(message, isAdministrator ? "Sesión de administrador." : "Sesión de responsable.", "success");
   try {
+    const spaceEditor = document.querySelector("[data-admin-space-form]");
+    if (spaceEditor) setSpaceScheduleForm(spaceEditor);
     await loadAdminSpacesAndTypes(isAdministrator);
     if (isAdministrator) await loadAdminUsers();
 
@@ -1151,11 +1402,20 @@ async function loadAdminPage() {
       const form = event.currentTarget;
       const feedback = document.querySelector("[data-space-feedback]");
       const submit = form.querySelector("[data-space-submit]");
+      const schedules = getSpaceScheduleFormValues(form);
+      if (!schedules.length) {
+        showMessage(feedback, "Selecciona al menos un día y horario disponible.", "error");
+        return;
+      }
+      if (schedules.some((schedule) => schedule.opensAt >= schedule.closesAt)) {
+        showMessage(feedback, "En cada día, la hora de cierre debe ser posterior a la hora de apertura.", "error");
+        return;
+      }
       submit.disabled = true;
       const body = {
         name: form.elements.name.value.trim(), typeId: form.elements.typeId.value,
         location: form.elements.location.value.trim(), capacity: Number(form.elements.capacity.value),
-        description: form.elements.description.value.trim(), status: form.elements.status.value,
+        description: form.elements.description.value.trim(), status: form.elements.status.value, schedules,
       };
       try {
         const spaceId = form.elements.spaceId.value;
@@ -1166,6 +1426,7 @@ async function loadAdminPage() {
         form.reset();
         form.elements.spaceId.value = "";
         form.elements.status.value = "ACTIVE";
+        setSpaceScheduleForm(form);
         submit.textContent = "Crear espacio";
         form.querySelector("[data-space-reset]").hidden = true;
         await loadAdminSpacesAndTypes(true);
@@ -1181,6 +1442,7 @@ async function loadAdminPage() {
       form.reset();
       form.elements.spaceId.value = "";
       form.elements.status.value = "ACTIVE";
+      setSpaceScheduleForm(form);
       form.querySelector("[data-space-submit]").textContent = "Crear espacio";
       form.querySelector("[data-space-reset]").hidden = true;
       showMessage(document.querySelector("[data-space-feedback]"), "");

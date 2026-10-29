@@ -2,7 +2,6 @@ package co.edu.uniajc.rsu_auth_service.service;
 
 import java.util.List;
 import java.util.Set;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
@@ -43,7 +42,7 @@ public class AdminUserService {
     }
 
     @Transactional
-    public AdminUserResponse updateRoles(UUID actorId, UUID userId, UpdateUserRolesRequest request) {
+    public AdminUserResponse updateRoles(Long actorId, Long userId, UpdateUserRolesRequest request) {
         User user = userRepository.findWithRolesAndManagedSpacesById(userId)
                 .orElseThrow(() -> new NotFoundException("User was not found"));
         boolean isAdministrator = user.getRoles().stream()
@@ -70,7 +69,7 @@ public class AdminUserService {
     }
 
     @Transactional
-    public AdminUserResponse assignManagedSpaces(UUID actorId, UUID userId, AssignManagedSpacesRequest request) {
+    public AdminUserResponse assignManagedSpaces(Long actorId, Long userId, AssignManagedSpacesRequest request) {
         User user = userRepository.findWithRolesAndManagedSpacesById(userId)
                 .orElseThrow(() -> new NotFoundException("User was not found"));
         if (!request.spaceIds().isEmpty()
@@ -88,7 +87,7 @@ public class AdminUserService {
     }
 
     @Transactional
-    public AdminUserResponse updateStatus(UUID actorId, UUID userId, UserStatus status) {
+    public AdminUserResponse updateStatus(Long actorId, Long userId, UserStatus status) {
         if (actorId.equals(userId) && status == UserStatus.INACTIVE) {
             throw new BadRequestException("You cannot deactivate your own account");
         }

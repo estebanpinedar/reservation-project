@@ -1,7 +1,6 @@
 package co.edu.uniajc.rsu_auth_service.service;
 
 import java.time.OffsetDateTime;
-import java.util.UUID;
 import java.util.List;
 import org.springframework.security.access.AccessDeniedException;
 
@@ -42,7 +41,7 @@ public class SpaceBlockService {
     }
 
     @Transactional
-    public SpaceBlockResponse create(UUID actorId, boolean administrator, CreateSpaceBlockRequest request) {
+    public SpaceBlockResponse create(Long actorId, boolean administrator, CreateSpaceBlockRequest request) {
         validatePeriod(request.startAt(), request.endAt());
         requireSpaceAccess(actorId, administrator, request.spaceId());
         Space space = spaceRepository.lockByIdAndStatus(request.spaceId(), SpaceStatus.ACTIVE)
@@ -63,7 +62,7 @@ public class SpaceBlockService {
     }
 
     @Transactional
-    public SpaceBlockResponse cancel(UUID blockId, UUID actorId, boolean administrator) {
+    public SpaceBlockResponse cancel(Long blockId, Long actorId, boolean administrator) {
         SpaceBlock block = spaceBlockRepository.findWithDetailsById(blockId)
                 .orElseThrow(() -> new NotFoundException("Space block was not found"));
         requireSpaceAccess(actorId, administrator, block.getSpace().getId());
@@ -76,7 +75,7 @@ public class SpaceBlockService {
     }
 
     @Transactional(readOnly = true)
-    public List<SpaceBlockResponse> list(UUID actorId, boolean administrator, UUID spaceId,
+    public List<SpaceBlockResponse> list(Long actorId, boolean administrator, Long spaceId,
             OffsetDateTime startAt, OffsetDateTime endAt, BlockStatus status) {
         validateOptionalPeriod(startAt, endAt);
         return spaceBlockRepository.findAgenda(spaceId, startAt, endAt, status).stream()
@@ -85,7 +84,7 @@ public class SpaceBlockService {
                 .map(this::toResponse).toList();
     }
 
-    private void requireSpaceAccess(UUID actorId, boolean administrator, UUID spaceId) {
+    private void requireSpaceAccess(Long actorId, boolean administrator, Long spaceId) {
         if (!administrator && !userRepository.existsByIdAndManagedSpaces_Id(actorId, spaceId)) {
             throw new AccessDeniedException("The manager is not assigned to this space");
         }

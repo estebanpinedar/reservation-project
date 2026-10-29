@@ -1,7 +1,6 @@
 package co.edu.uniajc.rsu_auth_service.controller;
 
 import java.util.List;
-import java.util.UUID;
 
 import jakarta.validation.Valid;
 
@@ -38,19 +37,19 @@ public class AdminUserController {
 
     @PatchMapping("/{userId}/roles")
     public ResponseEntity<AdminUserResponse> updateRoles(@AuthenticationPrincipal String actorId,
-            @PathVariable UUID userId, @Valid @RequestBody UpdateUserRolesRequest request) {
-        return ResponseEntity.ok(adminUserService.updateRoles(UUID.fromString(actorId), userId, request));
+            @PathVariable Long userId, @Valid @RequestBody UpdateUserRolesRequest request) {
+        return ResponseEntity.ok(adminUserService.updateRoles(Long.valueOf(actorId), userId, request));
     }
 
     @PatchMapping("/{userId}/status")
     public ResponseEntity<AdminUserResponse> updateStatus(@AuthenticationPrincipal String actorId,
-            @PathVariable UUID userId, @Valid @RequestBody UpdateUserStatusRequest request) {
-        return ResponseEntity.ok(adminUserService.updateStatus(UUID.fromString(actorId), userId, request.status()));
+            @PathVariable Long userId, @Valid @RequestBody UpdateUserStatusRequest request) {
+        return ResponseEntity.ok(adminUserService.updateStatus(Long.valueOf(actorId), userId, request.status()));
     }
 
     @PatchMapping("/{userId}/managed-spaces")
     public ResponseEntity<AdminUserResponse> assignManagedSpaces(@AuthenticationPrincipal String actorId,
-            @PathVariable UUID userId, @Valid @RequestBody AssignManagedSpacesRequest request) {
-        return ResponseEntity.ok(adminUserService.assignManagedSpaces(UUID.fromString(actorId), userId, request));
+            @PathVariable Long userId, @Valid @RequestBody AssignManagedSpacesRequest request) {
+        return ResponseEntity.ok(adminUserService.assignManagedSpaces(Long.valueOf(actorId), userId, request));
     }
 }

@@ -1,6 +1,5 @@
 package co.edu.uniajc.rsu_auth_service.controller;
 
-import java.util.UUID;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -21,6 +20,6 @@ public class UserProfileController {
 
     @GetMapping("/me")
     public ResponseEntity<AuthService.UserProfile> profile(@AuthenticationPrincipal String userId) {
-        return ResponseEntity.ok(authService.profile(UUID.fromString(userId)));
+        return ResponseEntity.ok(authService.profile(Long.valueOf(userId)));
     }
 }

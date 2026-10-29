@@ -7,7 +7,6 @@ import java.time.Instant;
 import java.util.Base64;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
@@ -81,7 +80,7 @@ public class JwtService {
             throw new InvalidTokenException("Bearer token has expired");
         }
         try {
-            UUID userId = UUID.fromString(payload.path("sub").asText());
+            Long userId = Long.valueOf(payload.path("sub").asText());
             List<String> roles = payload.path("roles").isArray()
                     ? toRoleNames(payload.path("roles"))
                     : List.of();
@@ -142,6 +141,6 @@ public class JwtService {
     public record Token(String value, Instant expiresAt) {
     }
 
-    public record AuthenticatedToken(UUID userId, String email, List<String> roles) {
+    public record AuthenticatedToken(Long userId, String email, List<String> roles) {
     }
 }

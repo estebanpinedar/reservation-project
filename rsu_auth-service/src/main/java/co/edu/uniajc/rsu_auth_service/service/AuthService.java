@@ -2,7 +2,6 @@ package co.edu.uniajc.rsu_auth_service.service;
 
 import java.util.Comparator;
 import java.util.Locale;
-import java.util.UUID;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -58,7 +57,7 @@ public class AuthService {
     }
 
     @Transactional(readOnly = true)
-    public UserProfile profile(UUID userId) {
+    public UserProfile profile(Long userId) {
         User user = userRepository.findWithRolesAndManagedSpacesById(userId)
                 .orElseThrow(() -> new InvalidCredentialsException());
         return new UserProfile(user.getId(), user.getName(), user.getEmail(), user.getStatus().name(),
@@ -76,7 +75,7 @@ public class AuthService {
         return email.trim().toLowerCase(Locale.ROOT);
     }
 
-    public record UserProfile(UUID id, String name, String email, String status, java.util.List<String> roles,
-            java.util.List<UUID> managedSpaceIds) {
+    public record UserProfile(Long id, String name, String email, String status, java.util.List<String> roles,
+            java.util.List<Long> managedSpaceIds) {
     }
 }

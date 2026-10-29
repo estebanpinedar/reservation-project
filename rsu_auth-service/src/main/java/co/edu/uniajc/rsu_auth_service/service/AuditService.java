@@ -1,6 +1,5 @@
 package co.edu.uniajc.rsu_auth_service.service;
 
-import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 
@@ -19,7 +18,7 @@ public class AuditService {
         this.userRepository = userRepository;
     }
 
-    public void record(UUID actorId, String action, String entity, UUID entityId, String detail) {
+    public void record(Long actorId, String action, String entity, Long entityId, String detail) {
         User actor = userRepository.getReferenceById(actorId);
         auditEntryRepository.save(new AuditEntry(actor, action, entity, entityId, detail));
     }

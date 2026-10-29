@@ -1,7 +1,6 @@
 package co.edu.uniajc.rsu_auth_service.model;
 
 import java.time.OffsetDateTime;
-import java.util.UUID;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -32,7 +31,7 @@ public class AuditEntry {
     private String entity;
 
     @Column(name = "entidad_id")
-    private UUID entityId;
+    private Long entityId;
 
     @Column(name = "detalle")
     private String detail;
@@ -43,7 +42,7 @@ public class AuditEntry {
     protected AuditEntry() {
     }
 
-    public AuditEntry(User actor, String action, String entity, UUID entityId, String detail) {
+    public AuditEntry(User actor, String action, String entity, Long entityId, String detail) {
         this.actor = actor;
         this.action = action;
         this.entity = entity;
@@ -55,7 +54,7 @@ public class AuditEntry {
     public User getActor() { return actor; }
     public String getAction() { return action; }
     public String getEntity() { return entity; }
-    public UUID getEntityId() { return entityId; }
+    public Long getEntityId() { return entityId; }
     public String getDetail() { return detail; }
     public OffsetDateTime getCreatedAt() { return createdAt; }
 

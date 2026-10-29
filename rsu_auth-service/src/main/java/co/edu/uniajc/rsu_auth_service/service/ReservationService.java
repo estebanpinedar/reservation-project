@@ -1,8 +1,8 @@
 package co.edu.uniajc.rsu_auth_service.service;
 
 import java.time.OffsetDateTime;
+import java.time.ZoneId;
 import java.util.List;
-import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -43,10 +43,15 @@ public class ReservationService {
     }
 
     @Transactional
-    public ReservationResponse create(UUID creatorId, CreateReservationRequest request) {
+    public ReservationResponse create(Long creatorId, CreateReservationRequest request) {
         validatePeriod(request.startAt(), request.endAt());
+        validateSameLocalDay(request.startAt(), request.endAt());
+        validateHalfHourTimes(request.startAt(), request.endAt());
         Space space = spaceRepository.lockByIdAndStatus(request.spaceId(), SpaceStatus.ACTIVE)
                 .orElseThrow(() -> new NotFoundException("Active space was not found"));
+        if (!space.isAvailableDuring(request.startAt(), request.endAt(), ZoneId.of("America/Bogota"))) {
+            throw new BadRequestException("El horario solicitado está fuera de los días u horas disponibles del espacio.");
+        }
         if (request.attendees() > space.getCapacity()) {
             throw new BadRequestException("Attendees exceed the capacity of the selected space");
         }
@@ -67,7 +72,7 @@ public class ReservationService {
     }
 
     @Transactional(readOnly = true)
-    public List<ReservationResponse> listMine(UUID creatorId, ReservationStatus status, OffsetDateTime startAt,
+    public List<ReservationResponse> listMine(Long creatorId, ReservationStatus status, OffsetDateTime startAt,
             OffsetDateTime endAt) {
         validateOptionalPeriod(startAt, endAt);
         OffsetDateTime now = OffsetDateTime.now();
@@ -79,7 +84,7 @@ public class ReservationService {
     }
 
     @Transactional(readOnly = true)
-    public List<ReservationOverviewResponse> listAgenda(OffsetDateTime startAt, OffsetDateTime endAt, UUID spaceId,
+    public List<ReservationOverviewResponse> listAgenda(OffsetDateTime startAt, OffsetDateTime endAt, Long spaceId,
             ReservationStatus status) {
         validatePeriod(startAt, endAt);
         OffsetDateTime now = OffsetDateTime.now();
@@ -93,7 +98,7 @@ public class ReservationService {
     }
 
     @Transactional
-    public ReservationResponse cancel(UUID reservationId, UUID requesterId, boolean requesterIsAdministrator,
+    public ReservationResponse cancel(Long reservationId, Long requesterId, boolean requesterIsAdministrator,
             CancelReservationRequest request) {
         Reservation reservation = reservationRepository.findWithDetailsById(reservationId)
                 .orElseThrow(() -> new NotFoundException("Reservation was not found"));
@@ -116,6 +121,25 @@ public class ReservationService {
         if (startAt == null || endAt == null || !startAt.isBefore(endAt)) {
             throw new BadRequestException("Start time must be before end time");
         }
+    }
+
+    private void validateHalfHourTimes(OffsetDateTime startAt, OffsetDateTime endAt) {
+        if (!isOnHalfHour(startAt) || !isOnHalfHour(endAt)) {
+            throw new BadRequestException(
+                    "Las horas de inicio y finalización deben estar en intervalos de 30 minutos (00 o 30)");
+        }
+    }
+
+    private void validateSameLocalDay(OffsetDateTime startAt, OffsetDateTime endAt) {
+        var zone = ZoneId.of("America/Bogota");
+        if (!startAt.atZoneSameInstant(zone).toLocalDate().equals(endAt.atZoneSameInstant(zone).toLocalDate())) {
+            throw new BadRequestException("La reserva debe iniciar y finalizar el mismo día.");
+        }
+    }
+
+    private boolean isOnHalfHour(OffsetDateTime value) {
+        var time = value.atZoneSameInstant(ZoneId.of("America/Bogota")).toLocalTime();
+        return (time.getMinute() == 0 || time.getMinute() == 30) && time.getSecond() == 0 && time.getNano() == 0;
     }
 
     private void validateOptionalPeriod(OffsetDateTime startAt, OffsetDateTime endAt) {

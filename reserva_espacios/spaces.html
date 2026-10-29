@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Espacios</title>
     <link rel="icon" type="image/png" sizes="64x64" href="img/favicon.png">
-    <link rel="stylesheet" href="css/styles.css?v=layout-20261021">
+    <link rel="stylesheet" href="css/styles.css?v=weekly-space-hours-20261028">
   </head>
   <body data-page="spaces">
     <header class="site-header"><nav class="nav" aria-label="Navegación principal"><a class="brand" href="index.html"><img class="brand-logo" src="img/logo.png" alt="Reserva Campus" width="76" height="45"></a><div class="nav-links"><a href="index.html">Inicio</a><a class="is-current" href="spaces.html">Espacios</a><a href="reservations.html">Reservar</a><a data-admin-link href="admin.html" hidden>Administración</a><a data-login-link href="login.html">Iniciar sesión</a><a class="profile-link" data-profile-link href="profile.html" aria-label="Mi perfil" title="Mi perfil" hidden><svg aria-hidden="true" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="3.5"></circle><path d="M5 20c.7-3.4 3.2-5.2 7-5.2s6.3 1.8 7 5.2"></path></svg></a></div></nav></header>
@@ -28,8 +28,8 @@
         </form>
         <h3 class="tools-subtitle">Disponibilidad Por Horario</h3>
         <form class="filter-bar availability-search" data-availability-form>
-          <div class="field"><label for="availability-start">Disponible desde</label><input id="availability-start" name="startAt" type="datetime-local" required></div>
-          <div class="field"><label for="availability-end">Hasta</label><input id="availability-end" name="endAt" type="datetime-local" required></div>
+          <div class="field"><label for="availability-start">Disponible desde</label><input id="availability-start" name="startAt" type="datetime-local" lang="en-GB" required></div>
+          <div class="field"><label for="availability-end">Hasta</label><input id="availability-end" name="endAt" type="datetime-local" lang="en-GB" required></div>
           <div class="field"><label for="availability-capacity">Asistentes</label><input id="availability-capacity" name="minimumCapacity" type="number" min="1" max="100000" placeholder="Cualquier cantidad"></div>
           <button class="button button-primary" type="submit">Buscar disponibilidad</button>
         </form>
@@ -43,7 +43,7 @@
       <p class="feedback" data-availability-feedback role="status" aria-live="polite" hidden></p>
       <section class="grid space-grid availability-results" aria-label="Espacios disponibles para el horario elegido" data-availability-results aria-live="polite"></section>
       <dialog class="agenda-dialog" data-space-agenda-dialog aria-labelledby="space-agenda-title">
-        <div class="section-heading"><div><h2 id="space-agenda-title" data-space-agenda-title>Agenda Del Espacio</h2><p>Consulta las reservas y bloqueos de una fecha.</p></div><button class="button button-outline" type="button" data-agenda-close>Cerrar</button></div>
+        <div class="section-heading"><div><h2 id="space-agenda-title" data-space-agenda-title>Agenda Del Espacio</h2><p>Horarios libres para reservar en la fecha elegida.</p></div><button class="button button-outline" type="button" data-agenda-close>Cerrar</button></div>
         <form class="filter-bar agenda-date-form" data-space-agenda-form>
           <input name="spaceId" type="hidden">
           <div class="field"><label for="space-agenda-date">Fecha</label><input id="space-agenda-date" name="date" type="date" required></div>
@@ -56,6 +56,6 @@
       </div>
     </main>
     <footer class="site-footer"><div>Reserva Campus &middot; Sistema de reserva de espacios</div></footer>
-    <script type="module" src="js/app.js?v=title-case-20261021"></script>
+    <script type="module" src="js/app.js?v=time-format-24h-20261028"></script>
   </body>
 </html>

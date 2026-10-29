@@ -1,9 +1,9 @@
 package co.edu.uniajc.rsu_auth_service.model;
 
-import java.util.UUID;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
@@ -11,7 +11,8 @@ import jakarta.persistence.Table;
 @Table(name = "tipos_espacio")
 public class SpaceType {
     @Id
-    private UUID id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     @Column(name = "nombre", nullable = false, unique = true)
     private String name;
@@ -23,7 +24,6 @@ public class SpaceType {
     }
 
     public SpaceType(String name, String description) {
-        this.id = UUID.randomUUID();
         this.name = name;
         this.description = description;
     }
@@ -33,7 +33,7 @@ public class SpaceType {
         this.description = description;
     }
 
-    public UUID getId() {
+    public Long getId() {
         return id;
     }
 

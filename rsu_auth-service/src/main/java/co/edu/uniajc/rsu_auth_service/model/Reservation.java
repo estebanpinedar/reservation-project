@@ -1,13 +1,14 @@
 package co.edu.uniajc.rsu_auth_service.model;
 
 import java.time.OffsetDateTime;
-import java.util.UUID;
 
 import co.edu.uniajc.rsu_auth_service.model.Space;
 import co.edu.uniajc.rsu_auth_service.model.User;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
@@ -22,7 +23,8 @@ import jakarta.persistence.Table;
 @Table(name = "reservas")
 public class Reservation {
     @Id
-    private UUID id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "usuario_creador_id", nullable = false)
@@ -65,7 +67,6 @@ public class Reservation {
 
     public Reservation(User creator, Space space, OffsetDateTime startAt, OffsetDateTime endAt, String purpose,
             int attendees) {
-        this.id = UUID.randomUUID();
         this.creator = creator;
         this.space = space;
         this.startAt = startAt;
@@ -93,7 +94,7 @@ public class Reservation {
         updatedAt = OffsetDateTime.now();
     }
 
-    public UUID getId() {
+    public Long getId() {
         return id;
     }
 

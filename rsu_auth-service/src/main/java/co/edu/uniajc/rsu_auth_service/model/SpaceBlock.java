@@ -1,10 +1,11 @@
 package co.edu.uniajc.rsu_auth_service.model;
 
 import java.time.OffsetDateTime;
-import java.util.UUID;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
@@ -19,7 +20,8 @@ import jakarta.persistence.Table;
 @Table(name = "bloqueos")
 public class SpaceBlock {
     @Id
-    private UUID id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "espacio_id", nullable = false)
@@ -55,7 +57,6 @@ public class SpaceBlock {
     }
 
     public SpaceBlock(Space space, User creator, OffsetDateTime startAt, OffsetDateTime endAt, String reason) {
-        this.id = UUID.randomUUID();
         this.space = space;
         this.creator = creator;
         this.startAt = startAt;
@@ -81,7 +82,7 @@ public class SpaceBlock {
         updatedAt = OffsetDateTime.now();
     }
 
-    public UUID getId() { return id; }
+    public Long getId() { return id; }
     public Space getSpace() { return space; }
     public OffsetDateTime getStartAt() { return startAt; }
     public OffsetDateTime getEndAt() { return endAt; }

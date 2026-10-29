@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Administración</title>
     <link rel="icon" type="image/png" sizes="64x64" href="img/favicon.png">
-    <link rel="stylesheet" href="css/styles.css?v=layout-20261021">
+    <link rel="stylesheet" href="css/styles.css?v=weekly-space-hours-20261028">
   </head>
   <body data-page="admin">
     <header class="site-header">
@@ -56,6 +56,19 @@
               <div class="field"><label for="admin-space-location">Ubicación</label><input id="admin-space-location" name="location" maxlength="160" required></div>
               <div class="field"><label for="admin-space-capacity">Capacidad</label><input id="admin-space-capacity" name="capacity" type="number" min="1" max="100000" required></div>
               <div class="field"><label for="admin-space-status">Estado</label><select id="admin-space-status" name="status"><option value="ACTIVE">Activo</option><option value="MAINTENANCE">Mantenimiento</option><option value="INACTIVE">Inactivo</option></select></div>
+              <fieldset class="space-schedule full" data-space-schedule-editor>
+                <legend>Horario semanal disponible</legend>
+                <p class="field-hint">Selecciona los días y define el horario de atención. Las reservas deben quedar dentro de estas horas.</p>
+                <div class="schedule-days">
+                  <div class="schedule-day-row" data-schedule-row><label class="schedule-day-toggle"><input type="checkbox" data-schedule-day value="MONDAY" checked> Lunes</label><div class="field"><label>Desde</label><select data-schedule-open aria-label="Apertura del lunes"></select></div><div class="field"><label>Hasta</label><select data-schedule-close aria-label="Cierre del lunes"></select></div></div>
+                  <div class="schedule-day-row" data-schedule-row><label class="schedule-day-toggle"><input type="checkbox" data-schedule-day value="TUESDAY" checked> Martes</label><div class="field"><label>Desde</label><select data-schedule-open aria-label="Apertura del martes"></select></div><div class="field"><label>Hasta</label><select data-schedule-close aria-label="Cierre del martes"></select></div></div>
+                  <div class="schedule-day-row" data-schedule-row><label class="schedule-day-toggle"><input type="checkbox" data-schedule-day value="WEDNESDAY" checked> Miércoles</label><div class="field"><label>Desde</label><select data-schedule-open aria-label="Apertura del miércoles"></select></div><div class="field"><label>Hasta</label><select data-schedule-close aria-label="Cierre del miércoles"></select></div></div>
+                  <div class="schedule-day-row" data-schedule-row><label class="schedule-day-toggle"><input type="checkbox" data-schedule-day value="THURSDAY" checked> Jueves</label><div class="field"><label>Desde</label><select data-schedule-open aria-label="Apertura del jueves"></select></div><div class="field"><label>Hasta</label><select data-schedule-close aria-label="Cierre del jueves"></select></div></div>
+                  <div class="schedule-day-row" data-schedule-row><label class="schedule-day-toggle"><input type="checkbox" data-schedule-day value="FRIDAY" checked> Viernes</label><div class="field"><label>Desde</label><select data-schedule-open aria-label="Apertura del viernes"></select></div><div class="field"><label>Hasta</label><select data-schedule-close aria-label="Cierre del viernes"></select></div></div>
+                  <div class="schedule-day-row" data-schedule-row><label class="schedule-day-toggle"><input type="checkbox" data-schedule-day value="SATURDAY" checked> Sábado</label><div class="field"><label>Desde</label><select data-schedule-open aria-label="Apertura del sábado"></select></div><div class="field"><label>Hasta</label><select data-schedule-close aria-label="Cierre del sábado"></select></div></div>
+                  <div class="schedule-day-row" data-schedule-row><label class="schedule-day-toggle"><input type="checkbox" data-schedule-day value="SUNDAY"> Domingo</label><div class="field"><label>Desde</label><select data-schedule-open aria-label="Apertura del domingo"></select></div><div class="field"><label>Hasta</label><select data-schedule-close aria-label="Cierre del domingo"></select></div></div>
+                </div>
+              </fieldset>
               <div class="field full"><label for="admin-space-description">Descripción</label><textarea id="admin-space-description" name="description" maxlength="500"></textarea></div>
             </div>
             <p class="feedback" data-space-feedback role="status" aria-live="polite" hidden></p>
@@ -89,8 +102,8 @@
           <form class="form-card admin-form" data-admin-block-form>
             <div class="form-grid">
               <div class="field full"><label for="admin-block-space">Espacio</label><select id="admin-block-space" name="spaceId" required><option value="">Selecciona un espacio activo</option></select></div>
-              <div class="field"><label for="admin-block-start">Inicio</label><input id="admin-block-start" name="startAt" type="datetime-local" required></div>
-              <div class="field"><label for="admin-block-end">Fin</label><input id="admin-block-end" name="endAt" type="datetime-local" required></div>
+              <div class="field"><label for="admin-block-start">Inicio</label><input id="admin-block-start" name="startAt" type="datetime-local" lang="en-GB" required></div>
+              <div class="field"><label for="admin-block-end">Fin</label><input id="admin-block-end" name="endAt" type="datetime-local" lang="en-GB" required></div>
               <div class="field full"><label for="admin-block-reason">Motivo</label><textarea id="admin-block-reason" name="reason" maxlength="250" required></textarea></div>
             </div>
             <p class="feedback" data-block-feedback role="status" aria-live="polite" hidden></p>
@@ -128,6 +141,6 @@
       </div>
     </main>
     <footer class="site-footer"><div>Reserva Campus &middot; Sistema de reserva de espacios</div></footer>
-    <script type="module" src="js/app.js?v=title-case-20261021"></script>
+    <script type="module" src="js/app.js?v=time-format-24h-20261028"></script>
   </body>
 </html>
